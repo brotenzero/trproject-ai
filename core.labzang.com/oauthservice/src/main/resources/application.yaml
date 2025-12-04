@@ -8,12 +8,12 @@ spring:
       username: default
       password: ${REDIS_PASSWORD:}
       ssl:
-        enabled: ${REDIS_SSL_ENABLED:false}
+        enabled: ${SPRING_REDIS_SSL_ENABLED:true}
       timeout: 5000ms
       lettuce:
         ssl:
-          enabled: ${REDIS_SSL_ENABLED:false}
-          verify-peer: true
+          enabled: ${SPRING_REDIS_SSL_ENABLED:true}
+          verify-peer: false
         pool:
           max-active: 8
           max-idle: 8
