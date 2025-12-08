@@ -20,6 +20,6 @@ class TitanicMethod(object):
     def drop_feature(self, df: DataFrame, *feature: str) -> pd.DataFrame:
         return df.drop(columns=[x for x in feature])
 
-    def null_check(self, df: DataFrame) -> int:
+    def check_null(self, df: DataFrame) -> int:
         return int(df.isnull().sum().sum())
 
