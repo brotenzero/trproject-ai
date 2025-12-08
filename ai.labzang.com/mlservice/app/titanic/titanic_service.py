@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from icecream import ic
+from app.titanic.titanic_method import TitanicMethod
 
 # 공통 모듈 경로 추가
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -25,9 +26,18 @@ class TitanicService:
     def __init__(self):
         pass
 
-
     def preprocess(self):
         ic("😎😎 전처리 시작")
+        the_method = TitanicMethod()
+        this = the_method.new_model()
+        ic(f'1. Train 의 type \n {type(this.train)} ')
+        ic(f'2. Train 의 column \n {this.train.columns} ')
+        ic(f'3. Train 의 상위 1개 행\n {this.train.head()} ')
+        ic(f'4. Train 의 null 의 갯수\n {this.train.isnull().sum()}개')
+        ic(f'5. Test 의 type \n {type(this.test)}')
+        ic(f'6. Test 의 column \n {this.test.columns}')
+        ic(f'7. Test 의 상위 1개 행\n {this.test.head()}개')
+        ic(f'8. Test 의 null 의 갯수\n {this.test.isnull().sum()}개')
         ic("😎😎 전처리 완료")
 
     def modeling(self):
