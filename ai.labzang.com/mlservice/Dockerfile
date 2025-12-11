@@ -5,6 +5,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# 한글 폰트 설치 (나눔고딕)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    fonts-nanum \
+    fontconfig && \
+    fc-cache -fv && \
+    rm -rf /var/lib/apt/lists/*
+
 # 공통 모듈 복사 (빌드 컨텍스트가 ai.labzang.com인 경우)
 COPY common ./common
 

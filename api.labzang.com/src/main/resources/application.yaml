@@ -11,7 +11,7 @@ spring:
     gateway:
       httpclient:
         connect-timeout: 10000
-        response-timeout: 30s
+        response-timeout: 120s
         pool:
           max-connections: 1000
           max-idle-time: 30s
@@ -49,6 +49,8 @@ spring:
             - Path=/api/ml/**
           filters:
             - RewritePath=/api/ml/(?<segment>.*), /ml/${segment}
+          metadata:
+            response-timeout: 300000
 
       globalcors:
         cors-configurations:

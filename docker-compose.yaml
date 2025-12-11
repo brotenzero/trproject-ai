@@ -5,15 +5,14 @@
 # profiles를 통해 서비스 그룹을 선택적으로 실행할 수 있습니다.
 #
 # 사용 예시:
-#   - 기본 스택 실행 (gateway):
+#   - 기본 스택 실행 (gateway + mlservice):
 #     docker compose up
-#
-#   - AI 서비스 포함:
-#     docker compose --profile ai up
 #
 #   - 백그라운드 실행:
 #     docker compose up -d
-#     docker compose --profile ai up -d
+#
+#   - AI 서비스 전체 포함:
+#     docker compose --profile ai up
 #
 # 주의사항:
 #   1. Docker Desktop이 실행 중이어야 합니다.
@@ -50,13 +49,16 @@ services:
       - REDIS_PASSWORD=${UPSTASH_REDIS_PASSWORD}
       - REDIS_URL=${UPSTASH_REDIS_URL}
       - JWT_SECRET=${JWT_SECRET}
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
+    depends_on:
+      - mlservice
     restart: on-failure
+    # .env 파일이 없어도 실행 가능하도록 설정
 
-  # ========================================================================
-  # AI Services (FastAPI)
-  # ========================================================================
+    # ========================================================================
+    # AI Services (FastAPI)
+    # ========================================================================
   ai-authservice:
     build:
       context: ./ai.labzang.com
@@ -156,6 +158,9 @@ services:
       - ai
     restart: on-failure
 
+  # ========================================================================
+  # ML Service (FastAPI)
+  # ========================================================================
   mlservice:
     build:
       context: ./ai.labzang.com
@@ -165,6 +170,9 @@ services:
       - "9010:9010"
     networks:
       - labzang-network
+    volumes:
+      # data 폴더를 로컬과 동기화하여 CSV 파일이 로컬에도 저장되도록 함
+      - ./ai.labzang.com/mlservice/app/seoul_crime/data:/app/app/seoul_crime/data
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DB_HOST=${DB_HOST}
@@ -183,15 +191,16 @@ services:
       - REDIS_SSL_ENABLED=true
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
-    env_file:
-      - .env
-    profiles:
-      - ai
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+    # env_file:
+    #   - .env
     restart: on-failure
+    # .env 파일이 없어도 실행 가능하도록 설정
 
-# ========================================================================
-# Networks
-# ========================================================================
+    # ========================================================================
+    # Networks
+    # ========================================================================
 networks:
   labzang-network:
     driver: bridge
@@ -202,6 +211,6 @@ networks:
 # ========================================================================
 # 1. .env 파일 생성: env.template을 참고하여 .env 파일 생성
 # 2. Neon PostgreSQL과 Upstash Redis 정보 입력
-# 3. 기본 서비스 실행 (gateway): docker compose up
-# 4. AI 서비스 포함: docker compose --profile ai up
+# 3. 기본 서비스 실행 (gateway + mlservice): docker compose up
+# 4. AI 서비스 전체 포함: docker compose --profile ai up
 # ========================================================================

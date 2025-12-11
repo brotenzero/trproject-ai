@@ -39,12 +39,18 @@ except Exception as e:
 LoggingMiddleware = None
 try:
     from app.titanic.titanic_router import router as titanic_router
+    from app.seoul_crime.seoul_router import router as seoul_router
+    from app.us_unemployment.router import router as usa_router
+    from app.nlp.nlp_router import router as nlp_router
     from common.middleware import LoggingMiddleware
     from common.utils import setup_logging
 except ImportError as e:
     # 모듈을 찾을 수 없는 경우 기본값 사용
     from fastapi import APIRouter
     titanic_router = APIRouter()
+    seoul_router = APIRouter()
+    usa_router = APIRouter()
+    nlp_router = APIRouter()
     def setup_logging(name):
         import logging
         return logging.getLogger(name)
@@ -54,22 +60,38 @@ logger = setup_logging(config.service_name)
 
 # FastAPI 앱 생성
 app = FastAPI(
-    title="Titanic Service API",
+    title="ML Service API",
     description="""
-    ## 타이타닉 데이터 서비스 API
+    ## ML 서비스 통합 API
     
-    머신러닝을 활용한 타이타닉 승객 데이터 분석 및 생존 예측 서비스입니다.
+    머신러닝과 자연어 처리를 활용한 다양한 데이터 분석 및 예측 서비스입니다.
     
     ### 주요 기능
+    
+    #### 1. 타이타닉 데이터 분석
     - 승객 데이터 조회 및 통계 분석
     - 머신러닝 모델 훈련 (Random Forest)
     - 승객 생존 예측
-    - 배치 예측 지원
+    
+    #### 2. 서울 범죄 데이터 분석
+    - 범죄 데이터 전처리 및 시각화
+    - 지역별 범죄율 분석
+    - 히트맵 및 지도 시각화
+    
+    #### 3. 미국 실업률 데이터
+    - 실업률 데이터 시각화
+    
+    #### 4. 자연어 처리 (NLP) ✨
+    - NLTK 기반 텍스트 분석
+    - 토큰화, 형태소 분석, 품사 태깅
+    - 워드클라우드 생성
+    - 말뭉치(Corpus) 분석
     
     ### 기술 스택
     - **Framework**: FastAPI
     - **ML Library**: scikit-learn, pandas, numpy
-    - **Model**: Random Forest Classifier
+    - **NLP Library**: NLTK, WordCloud
+    - **Visualization**: matplotlib, seaborn, folium
     
     ### API 문서
     - Swagger UI: `/docs`
@@ -89,11 +111,35 @@ app = FastAPI(
             "name": "titanic",
             "description": "타이타닉 승객 데이터 관련 API",
         },
+        {
+            "name": "seoul_crime",
+            "description": "서울 범죄 데이터 전처리 및 분석 API",
+        },
+        {
+            "name": "us_unemployment",
+            "description": "미국 실업률 데이터 시각화 API",
+        },
+        {
+            "name": "nlp",
+            "description": "자연어 처리(NLP) 및 텍스트 분석 API",
+        },
     ],
     openapi_tags=[
         {
             "name": "titanic",
             "description": "타이타닉 승객 데이터 및 머신러닝 예측 기능",
+        },
+        {
+            "name": "seoul_crime",
+            "description": "서울 범죄 데이터 전처리 및 분석 기능",
+        },
+        {
+            "name": "us_unemployment",
+            "description": "미국 실업률 데이터 시각화 기능",
+        },
+        {
+            "name": "nlp",
+            "description": "NLTK 기반 자연어 처리, 토큰화, 형태소 분석, 품사 태깅, 워드클라우드 생성",
         },
     ],
 )
@@ -114,6 +160,9 @@ if LoggingMiddleware is not None:
 # 라우터 등록
 # Gateway에서 이미 /ml로 rewrite하므로 prefix 없이 등록
 app.include_router(titanic_router, prefix="/ml")
+app.include_router(seoul_router, prefix="/ml")
+app.include_router(usa_router, prefix="/ml")
+app.include_router(nlp_router, prefix="/ml")
 
 # CSV 파일 경로
 CSV_FILE_PATH = Path(__file__).parent / "resources" / "titanic" / "train.csv"
@@ -159,7 +208,7 @@ async def root():
     return {
         "service": config.service_name,
         "version": config.service_version,
-        "message": "Titanic Service API"
+        "message": "ML Service API - Machine Learning & NLP Services"
     }
 
 
